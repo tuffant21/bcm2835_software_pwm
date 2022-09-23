@@ -3,10 +3,10 @@
 #include <bcm2835.h>
 #include "bcm2835_software_pwm.h"
 
-#define GPIO_12 RPI_V2_GPIO_P1_32 // orange
-#define GPIO_13 RPI_V2_GPIO_P1_33 // green
-#define GPIO_18 RPI_V2_GPIO_P1_12 // blue
-#define GPIO_19 RPI_V2_GPIO_P1_35 // purple
+#define GPIO_12 RPI_V2_GPIO_P1_32
+#define GPIO_13 RPI_V2_GPIO_P1_33
+#define GPIO_18 RPI_V2_GPIO_P1_12
+#define GPIO_19 RPI_V2_GPIO_P1_35
 
 #define RANGE 1024
 #define CHANNEL_0 0
