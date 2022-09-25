@@ -17,6 +17,7 @@ pwm is better if you need more than two channels, and reliability and precision 
 
 ## Example Code
 
+### Controlling an LED's brightness
 ```C
 #include <signal.h>
 #include <stdio.h>
@@ -92,6 +93,69 @@ int main() {
 
         // delays for one second before continuing
         bcm2835_delay(1);
+    }
+}
+```
+
+### Adjusting a passive buzzers frequency
+
+```C
+#include <signal.h>
+#include <stdio.h>
+#include <bcm2835.h>
+#include "bcm2835_software_pwm.h"
+
+#define PASSIVE_BUZZER RPI_V2_GPIO_P1_33
+#define FREQUENCY_LOW 1      // frequency in Hertz
+#define FREQUENCY_HIGH 1000  // frequency in Hertz
+
+// define a range of 2
+// data 0 will be off
+// data 1 will be 50% on, 50% off a.k.a. alternating current
+// data 2 will be 100% on         a.k.a. direct current
+#define RANGE 2
+#define CHANNEL_0 0
+
+void sigIntHandler() {
+    // stops all threads and deallocates memory
+    bcm2835_software_pwm_close();
+    
+    // set passive buzzer output to low
+    bcm2835_gpio_write(PASSIVE_BUZZER, LOW);
+    // closes the bcm2835 library
+    bcm2835_close();
+    exit(0);
+}
+
+int main() {
+    if (!bcm2835_init()) {
+        return 1;
+    }
+
+    signal(SIGINT, sigIntHandler);
+
+    // create an arbitrary channel 0
+    bcm2835_software_pwm_create_channel(CHANNEL_0);
+    // sets the range of the channel to RANGE
+    bcm2835_software_pwm_set_range(CHANNEL_0, RANGE);
+    // sets the data of the channel to a constant 1
+    // data 0 will be off
+    // data 1 will be 50% on, 50% off a.k.a. alternating current
+    // data 2 will be 100% on         a.k.a. direct current
+    bcm2835_software_pwm_set_data(CHANNEL_0, 1);
+    // assigns the pin of the passive buzzer as output pins on channel 0
+    bcm2835_software_pwm_assign_pin_to_channel(CHANNEL_0, PASSIVE_BUZZER);
+
+    // starts a thread for channel 0
+    bcm2835_software_pwm_start_all_channels();
+
+    while (1) {
+        for (int i = FREQUENCY_LOW; i < FREQUENCY_HIGH; i++) {
+            // sets the frequency to adjust the output sound
+            bcm2835_software_pwm_set_frequency(i);
+            // give it some time to play the sound
+            bcm2835_delay(5);
+        }
     }
 }
 ```
